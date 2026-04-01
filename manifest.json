@@ -1,0 +1,90 @@
+{
+    "slug": "post-event-report",
+    "name": "Post-Event Report Generator",
+    "version": "1.0.0",
+    "description": "Build a leadership-ready post-event report in minutes. Fill in attendance, budget, NPS, supplier ratings, and lessons learned — then export a polished PDF or JSON backup. Pulls linked data from the Event Countdown Planner automatically.",
+    "category": "reporting",
+    "difficulty": "beginner",
+    "requires_backend": true,
+    "is_published": false,
+    "author": "Visual Hive",
+    "source_repo": "https://github.com/Visual-Hive/eventhive-tool-post-event-report",
+    "tool_file": "tool.html",
+    "thumbnail": "thumbnail.png",
+    "config_schema": {
+        "sections": [
+            {
+                "id": "branding",
+                "title": "Branding",
+                "fields": [
+                    {
+                        "id": "companyName",
+                        "type": "text",
+                        "label": "Company / Organisation Name",
+                        "required": true,
+                        "default": "My Event Company"
+                    },
+                    {
+                        "id": "primaryColor",
+                        "type": "color",
+                        "label": "Primary Brand Colour",
+                        "default": "#2563eb"
+                    },
+                    {
+                        "id": "logoUrl",
+                        "type": "url",
+                        "label": "Logo URL",
+                        "required": false
+                    }
+                ]
+            },
+            {
+                "id": "event_details",
+                "title": "Event Details",
+                "fields": [
+                    {
+                        "id": "eventName",
+                        "type": "text",
+                        "label": "Event Name",
+                        "default": "Conference 2026"
+                    },
+                    {
+                        "id": "eventDate",
+                        "type": "text",
+                        "label": "Event Date",
+                        "placeholder": "YYYY-MM-DD",
+                        "default": "2026-06-15"
+                    }
+                ]
+            },
+            {
+                "id": "report_settings",
+                "title": "Report Settings",
+                "fields": [
+                    {
+                        "id": "reportAuthor",
+                        "type": "text",
+                        "label": "Default Report Author",
+                        "placeholder": "e.g. Jane Smith, Head of Events",
+                        "default": ""
+                    },
+                    {
+                        "id": "orgLogoUrl",
+                        "type": "url",
+                        "label": "Organisation Logo URL (for report header)",
+                        "required": false
+                    }
+                ]
+            }
+        ]
+    },
+    "default_config": {
+        "companyName": "My Event Company",
+        "primaryColor": "#2563eb",
+        "logoUrl": "",
+        "eventName": "Conference 2026",
+        "eventDate": "2026-06-15",
+        "reportAuthor": "",
+        "orgLogoUrl": ""
+    }
+}

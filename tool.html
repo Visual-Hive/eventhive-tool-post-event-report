@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{config.companyName}} — Post-Event Report</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f1f5f9;color:#1e293b;font-size:14px;line-height:1.5}
+:root{--primary:{{config.primaryColor}}}
+
+.app-header{background:var(--primary,#2563eb);color:white;padding:.625rem 1.25rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;position:sticky;top:0;z-index:50}
+.header-left{display:flex;align-items:center;gap:.75rem}
+.header-logo{height:28px;border-radius:4px}
+.header-company{font-size:.95rem;font-weight:700}
+.header-meta{font-size:.72rem;opacity:.85}
+
+.btn{display:inline-flex;align-items:center;gap:.3rem;padding:.4rem .8rem;border-radius:6px;font-size:.78rem;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:opacity .12s,transform .1s;white-space:nowrap;line-height:1.4}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--primary,#2563eb);color:white}.btn-primary:hover{opacity:.88}
+.btn-secondary{background:white;color:#374151;border:1px solid #d1d5db}.btn-secondary:hover{background:#f9fafb}
+.btn-ghost{background:transparent;color:#64748b;border:none}.btn-ghost:hover{background:#f1f5f9}
+.btn-white{background:white;color:var(--primary,#2563eb)}.btn-white:hover{background:#f0f9ff}
+.btn-sm{padding:.3rem .6rem;font-size:.73rem}
+.btn-lg{padding:.6rem 1.25rem;font-size:.88rem}
+.header-actions{display:flex;gap:.4rem;flex-wrap:wrap}
+
+.container{max-width:900px;margin:0 auto;padding:1.5rem 1rem}
+
+/* Step nav */
+.steps-nav{display:flex;gap:.25rem;margin-bottom:1.25rem;background:white;border-radius:9px;padding:.4rem;box-shadow:0 1px 3px rgba(0,0,0,.07);overflow-x:auto}
+.step-btn{display:flex;align-items:center;gap:.35rem;padding:.35rem .75rem;border-radius:6px;border:none;background:transparent;cursor:pointer;font-size:.75rem;font-weight:600;color:#64748b;white-space:nowrap;transition:background .1s,color .1s;font-family:inherit}
+.step-btn.active{background:var(--primary,#2563eb);color:white}
+.step-btn.done{color:#16a34a}
+.step-btn .step-num{width:18px;height:18px;border-radius:50%;background:#e2e8f0;color:#475569;font-size:.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-btn.active .step-num{background:rgba(255,255,255,.25);color:white}
+.step-btn.done .step-num{background:#dcfce7;color:#16a34a}
+
+/* Section cards */
+.section-card{background:white;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);overflow:hidden;margin-bottom:1rem}
+.section-header{background:var(--primary,#2563eb);color:white;padding:1rem 1.25rem}
+.section-header h2{font-size:1rem;font-weight:800;margin-bottom:.15rem}
+.section-header p{font-size:.75rem;opacity:.9}
+.section-body{padding:1.25rem}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+.form-field{display:flex;flex-direction:column;gap:.3rem}
+.form-field.full{grid-column:1/-1}
+.form-label{font-size:.75rem;font-weight:600;color:#374151}
+.form-input,.form-select,.form-textarea{border:1px solid #d1d5db;border-radius:7px;padding:.45rem .7rem;font-size:.83rem;font-family:inherit;color:#1e293b;background:white;width:100%}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--primary,#2563eb);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.form-textarea{resize:vertical;min-height:80px;line-height:1.55}
+.form-hint{font-size:.68rem;color:#94a3b8;margin-top:.1rem}
+.form-range{width:100%;accent-color:var(--primary,#2563eb)}
+.range-label{display:flex;justify-content:space-between;font-size:.7rem;color:#94a3b8;margin-top:.15rem}
+
+/* Supplier ratings */
+.supplier-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 2fr;gap:.5rem;align-items:center;padding:.5rem 0;border-bottom:1px solid #f1f5f9}
+.supplier-row:last-child{border-bottom:none}
+.supplier-row-header{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 2fr;gap:.5rem;font-size:.68rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;padding:.25rem 0 .5rem;border-bottom:2px solid #e2e8f0;margin-bottom:.25rem}
+.star-select{display:flex;gap:2px}
+.star{font-size:1rem;cursor:pointer;color:#d1d5db;transition:color .1s;line-height:1}
+.star.on{color:#f59e0b}
+.badge-would-use{display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:600;padding:.2rem .5rem;border-radius:4px;cursor:pointer;border:1px solid #d1d5db;background:white;transition:background .1s,color .1s}
+.badge-would-use.yes{background:#dcfce7;color:#16a34a;border-color:#86efac}
+.badge-would-use.no{background:#fee2e2;color:#dc2626;border-color:#fca5a5}
+
+/* Lessons rows */
+.lesson-row{display:grid;grid-template-columns:auto 1fr 1fr auto;gap:.5rem;align-items:start;margin-bottom:.5rem}
+.lesson-type{width:80px;font-size:.72rem;font-weight:700;padding:.3rem .4rem;border-radius:4px;text-align:center}
+.lesson-type.worked{background:#dcfce7;color:#15803d}
+.lesson-type.improve{background:#fef3c7;color:#92400e}
+.lesson-type.action{background:#dbeafe;color:#1d4ed8}
+.lesson-type.risk{background:#fee2e2;color:#b91c1c}
+.lesson-remove{background:none;border:none;cursor:pointer;color:#94a3b8;font-size:.9rem;padding:.2rem;border-radius:4px;align-self:center}
+.lesson-remove:hover{background:#fee2e2;color:#dc2626}
+
+/* NPS visualiser */
+.nps-scale{display:flex;gap:2px;margin-top:.5rem}
+.nps-num{flex:1;text-align:center;padding:.4rem 0;border-radius:4px;font-size:.7rem;font-weight:700;cursor:pointer;border:2px solid transparent;transition:border-color .1s,transform .1s}
+.nps-num:hover{transform:scale(1.08)}
+.nps-num.selected{border-color:var(--primary,#2563eb);transform:scale(1.12)}
+.nps-0,.nps-1,.nps-2,.nps-3,.nps-4,.nps-5,.nps-6{background:#fee2e2;color:#b91c1c}
+.nps-7,.nps-8{background:#fef3c7;color:#92400e}
+.nps-9,.nps-10{background:#dcfce7;color:#15803d}
+.nps-meta{display:flex;justify-content:space-between;font-size:.68rem;color:#94a3b8;margin-top:.2rem}
+
+/* Report preview */
+#report-preview{background:white;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);overflow:hidden}
+.report-cover{background:var(--primary,#2563eb);color:white;padding:2.5rem 2rem;text-align:center}
+.report-cover-logo{max-height:48px;max-width:160px;margin-bottom:1rem;border-radius:6px}
+.report-cover h1{font-size:1.6rem;font-weight:900;margin-bottom:.4rem}
+.report-cover h2{font-size:1rem;font-weight:400;opacity:.85}
+.report-cover-meta{font-size:.8rem;opacity:.75;margin-top:.75rem}
+.report-body{padding:1.75rem 2rem}
+.report-section{margin-bottom:2rem;page-break-inside:avoid}
+.report-section h3{font-size:.95rem;font-weight:800;color:var(--primary,#2563eb);border-bottom:2px solid var(--primary,#2563eb);padding-bottom:.35rem;margin-bottom:.875rem}
+.report-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.75rem;margin-bottom:1rem}
+.kpi-card{background:#f8fafc;border-radius:8px;padding:.75rem;text-align:center;border:1px solid #e2e8f0}
+.kpi-value{font-size:1.4rem;font-weight:900;color:var(--primary,#2563eb)}
+.kpi-label{font-size:.67rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.04em;margin-top:.15rem}
+.report-table{width:100%;border-collapse:collapse;font-size:.8rem}
+.report-table th{background:#f8fafc;padding:.5rem .75rem;text-align:left;font-size:.7rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #e2e8f0}
+.report-table td{padding:.5rem .75rem;border-bottom:1px solid #f1f5f9;vertical-align:top}
+.report-table tr:last-child td{border-bottom:none}
+.stars-display{color:#f59e0b;letter-spacing:1px;font-size:.9rem}
+.tag{display:inline-block;font-size:.65rem;font-weight:700;padding:.15rem .4rem;border-radius:3px;margin:.1rem .1rem 0 0}
+.tag-worked{background:#dcfce7;color:#15803d}
+.tag-improve{background:#fef3c7;color:#92400e}
+.tag-action{background:#dbeafe;color:#1d4ed8}
+.tag-risk{background:#fee2e2;color:#b91c1c}
+.lesson-text{font-size:.8rem;color:#374151;line-height:1.5}
+.report-paragraph{font-size:.82rem;color:#374151;line-height:1.65;margin-bottom:.5rem;white-space:pre-wrap}
+.nps-bar{height:10px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin:.35rem 0}
+.nps-bar-inner{height:100%;border-radius:99px}
+.nps-legend{display:flex;gap:.75rem;font-size:.68rem;color:#64748b;flex-wrap:wrap}
+.nps-legend span{display:flex;align-items:center;gap:.25rem}
+.nps-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+
+/* Nav footer */
+.step-nav-footer{display:flex;justify-content:space-between;align-items:center;padding-top:1rem;margin-top:.25rem;border-top:1px solid #e2e8f0}
+
+/* Toast */
+.toast{position:fixed;bottom:1.25rem;left:50%;transform:translateX(-50%) translateY(4rem);background:#1e293b;color:white;padding:.5rem 1.1rem;border-radius:8px;font-size:.78rem;font-weight:500;z-index:9999;transition:transform .22s;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* Footer */
+.app-footer{text-align:center;padding:.75rem;font-size:.67rem;color:#94a3b8;margin-top:2rem}
+.app-footer a{color:var(--primary,#2563eb);text-decoration:none;font-weight:600}
+
+/* Print */
+@media print{
+  body{background:white;font-size:11pt}
+  .app-header,.steps-nav,.section-card:not(#report-preview),.step-nav-footer,.app-footer,.header-actions,.btn,.toast{display:none!important}
+  #report-preview{box-shadow:none;border:none}
+  .report-body{padding:1rem}
+  .kpi-card{border:1px solid #e2e8f0}
+  @page{margin:1.2cm;size:A4}
+  .report-section{page-break-inside:avoid}
+}
+
+@media(max-width:640px){
+  .form-grid,.form-grid-3{grid-template-columns:1fr}
+  .form-field.full{grid-column:1}
+  .supplier-row,.supplier-row-header{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-left">
+    <img id="logo-img" class="header-logo" src="{{config.logoUrl}}" alt="" style="display:none">
+    <div>
+      <div class="header-company" id="hdr-company">{{config.companyName}}</div>
+      <div class="header-meta">Post-Event Report Generator</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-white btn-sm" onclick="exportJSON()">💾 Save backup</button>
+    <button class="btn btn-white btn-sm" onclick="printReport()">🖨 Print / PDF</button>
+  </div>
+</header>
+
+<div class="container" id="editor-view">
+
+  <!-- Step Nav -->
+  <div class="steps-nav" id="steps-nav"></div>
+
+  <!-- Step panels -->
+  <div id="step-panels"></div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Footer -->
+<div class="app-footer">Powered by <a href="https://eventhive.io" target="_blank">EventHive</a></div>
+
+<script>
+const EVENTHIVE_CONFIG = {};
+
+const cfg = {
+    companyName:  EVENTHIVE_CONFIG.companyName  || 'My Event Company',
+    primaryColor: EVENTHIVE_CONFIG.primaryColor || '#2563eb',
+    logoUrl:      EVENTHIVE_CONFIG.logoUrl       || '',
+    eventName:    EVENTHIVE_CONFIG.eventName    || '',
+    eventDate:    EVENTHIVE_CONFIG.eventDate    || '',
+    reportAuthor: EVENTHIVE_CONFIG.reportAuthor || '',
+    orgLogoUrl:   EVENTHIVE_CONFIG.orgLogoUrl   || ''
+};
+
+// ─── State ────────────────────────────────────────────────────────────────
+const S = {
+    step: 0,
+    d: {
+        // Overview
+        eventName: '', eventDate: '', venue: '', duration: '', eventType: 'conference',
+        reportAuthor: '', reportDate: '', summary: '',
+        // Attendance
+        registrations: '', attended: '', noShows: '', sponsors: '', speakers: '', staffTotal: '',
+        registrationPlatform: '', checkInMethod: '',
+        // Budget
+        totalBudget: '', totalSpend: '', currency: 'EUR',
+        budgetVenueActual:'', budgetCateringActual:'', budgetAVActual:'', budgetMarketingActual:'', budgetStaffingActual:'', budgetOtherActual:'',
+        budgetVenueBudget:'', budgetCateringBudget:'', budgetAVBudget:'', budgetMarketingBudget:'', budgetStaffingBudget:'', budgetOtherBudget:'',
+        budgetNotes: '',
+        // Attendee Experience
+        npsScore: null, npsResponses: '', satisfactionOverall: '', satisfactionContent: '',
+        satisfactionVenue: '', satisfactionCatering: '', satisfactionAV: '',
+        experienceNotes: '',
+        // Suppliers
+        suppliers: [],
+        // Content
+        totalSessions: '', mostPopularSession: '', avgRoomFill: '', streamingViews: '', contentNotes: '',
+        // Lessons
+        lessons: [],
+        // Recommendations
+        reco: '', nextEdition: '', nextDate: ''
+    }
+};
+
+let LS_KEY = '';
+
+function slugify(s){ return (s||'default').replace(/\W+/g,'_').toLowerCase(); }
+function esc(v){ if(v==null)return''; return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtCurrency(v,c){ const sym={'EUR':'€','GBP':'£','USD':'$'}[c]||''; const n=parseFloat(v); return isNaN(n)?'—':sym+n.toLocaleString(); }
+function fmtDate(s){ if(!s)return''; const d=new Date(s); if(isNaN(d))return s; const m=['January','February','March','April','May','June','July','August','September','October','November','December']; return d.getDate()+' '+m[d.getMonth()]+' '+d.getFullYear(); }
+function stars(n){ return '★'.repeat(Math.max(0,Math.min(5,n)))+'☆'.repeat(5-Math.max(0,Math.min(5,n))); }
+function pct(a,b){ const n=parseInt(a),t=parseInt(b); if(!t||isNaN(n))return null; return Math.round(n/t*100); }
+
+// ─── Hosted blob service ───────────────────────────────────────────────────
+let _perHosted = false;
+let _perApiBase = null;
+let _perRecordId = null;
+
+async function _perHostedLoad() {
+    const recs = await fetch(_perApiBase + '/report_state', { credentials: 'include' }).then(r => r.ok ? r.json() : []);
+    if (recs && recs.length) {
+        const { id, _createdAt, _updatedAt, source, ...d } = recs[0];
+        _perRecordId = id;
+        Object.assign(S.d, d);
+    }
+}
+
+async function _perHostedSave() {
+    const body = JSON.stringify({ ...S.d, source: 'post-event-report' });
+    if (_perRecordId) {
+        await fetch(_perApiBase + '/report_state/' + _perRecordId, { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body }).catch(()=>{});
+    } else {
+        const rec = await fetch(_perApiBase + '/report_state', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body }).then(r => r.ok ? r.json() : null).catch(()=>null);
+        if (rec && rec.id) _perRecordId = rec.id;
+    }
+}
+
+// ─── Save / Load ──────────────────────────────────────────────────────────
+function save(){
+    if(_perHosted){ _perHostedSave().catch(()=>{}); return; }
+    if(!LS_KEY)return;
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(S.d)); } catch(e){ showToast('⚠ Storage full'); }
+}
+async function load(){
+    if(_perHosted){ try{ await _perHostedLoad(); }catch(e){ console.warn('PER hosted load failed:', e); } return; }
+    const raw=localStorage.getItem(LS_KEY);
+    if(!raw)return;
+    try{ const d=JSON.parse(raw); if(d&&typeof d==='object') Object.assign(S.d,d); }catch{}
+}
+function bind(id, key, cb){
+    const el=document.getElementById(id);
+    if(!el)return;
+    if(el.type==='checkbox'){
+        el.checked=!!S.d[key];
+        el.addEventListener('change',()=>{ S.d[key]=el.checked; save(); if(cb)cb(); });
+    } else {
+        el.value=S.d[key]||'';
+        el.addEventListener('input',()=>{ S.d[key]=el.value; save(); if(cb)cb(); });
+    }
+}
+
+// ─── Steps Definition ─────────────────────────────────────────────────────
+const STEPS = [
+    {id:'overview',   emoji:'📋', label:'Overview'},
+    {id:'attendance', emoji:'👥', label:'Attendance'},
+    {id:'budget',     emoji:'💰', label:'Budget'},
+    {id:'experience', emoji:'⭐', label:'Feedback'},
+    {id:'suppliers',  emoji:'🤝', label:'Suppliers'},
+    {id:'content',    emoji:'🎤', label:'Content'},
+    {id:'lessons',    emoji:'💡', label:'Lessons'},
+    {id:'report',     emoji:'📄', label:'Report'}
+];
+
+// ─── Render Steps Nav ─────────────────────────────────────────────────────
+function renderNav(){
+    const nav=document.getElementById('steps-nav');
+    nav.innerHTML = STEPS.map((s,i)=>`
+        <button class="step-btn${i===S.step?' active':''}" onclick="goStep(${i})">
+            <span class="step-num">${s.emoji}</span>${s.label}
+        </button>
+    `).join('');
+}
+
+// ─── Go to Step ───────────────────────────────────────────────────────────
+function goStep(i){
+    S.step=i;
+    renderNav();
+    renderPanel();
+}
+
+// ─── Render Panel ─────────────────────────────────────────────────────────
+function renderPanel(){
+    const container=document.getElementById('step-panels');
+    const step=STEPS[S.step];
+    let html='';
+    switch(step.id){
+        case 'overview':   html=panelOverview(); break;
+        case 'attendance': html=panelAttendance(); break;
+        case 'budget':     html=panelBudget(); break;
+        case 'experience': html=panelExperience(); break;
+        case 'suppliers':  html=panelSuppliers(); break;
+        case 'content':    html=panelContent(); break;
+        case 'lessons':    html=panelLessons(); break;
+        case 'report':     html=panelReport(); break;
+    }
+    container.innerHTML = html;
+    // Bind all inputs after render
+    bindCurrentPanel(step.id);
+    // Scroll to top
+    window.scrollTo(0,0);
+}
+
+function navFooter(hasBack=true, nextLabel='Next →', lastStep=false){
+    const back = hasBack ? `<button class="btn btn-secondary" onclick="goStep(${S.step-1})">← Back</button>` : '<span></span>';
+    const next = lastStep
+        ? '<span></span>'
+        : `<button class="btn btn-primary" onclick="goStep(${S.step+1})">${esc(nextLabel)}</button>`;
+    return `<div class="step-nav-footer">${back}${next}</div>`;
+}
+
+// ─── Panel: Overview ──────────────────────────────────────────────────────
+function panelOverview(){
+    return `<div class="section-card">
+        <div class="section-header"><h2>📋 Event Overview</h2><p>Basic event information for the report header.</p></div>
+        <div class="section-body">
+            <div class="form-grid">
+                <div class="form-field"><label class="form-label">Event Name *</label><input class="form-input" id="f-eventName" placeholder="e.g. TechConf Europe 2026"></div>
+                <div class="form-field"><label class="form-label">Event Date *</label><input type="date" class="form-input" id="f-eventDate"></div>
+                <div class="form-field"><label class="form-label">Venue</label><input class="form-input" id="f-venue" placeholder="e.g. ExCeL London"></div>
+                <div class="form-field"><label class="form-label">Duration</label><input class="form-input" id="f-duration" placeholder="e.g. 2 days (15–16 June)"></div>
+                <div class="form-field"><label class="form-label">Event Type</label>
+                    <select class="form-select" id="f-eventType">
+                        <option value="conference">Conference</option><option value="tradeshow">Tradeshow</option>
+                        <option value="gala">Gala / Awards</option><option value="hybrid">Hybrid</option><option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-field"><label class="form-label">Report Author</label><input class="form-input" id="f-reportAuthor" placeholder="e.g. Jane Smith, Head of Events"></div>
+                <div class="form-field"><label class="form-label">Report Date</label><input type="date" class="form-input" id="f-reportDate"></div>
+                <div class="form-field full"><label class="form-label">Executive Summary</label>
+                    <textarea class="form-textarea" id="f-summary" rows="4" placeholder="2–3 sentence overview of the event. Tone: positive, factual, leadership-ready."></textarea>
+                </div>
+            </div>
+            ${navFooter(false,'Attendance →')}
+        </div>
+    </div>`;
+}
+
+// ─── Panel: Attendance ────────────────────────────────────────────────────
+function panelAttendance(){
+    return `<div class="section-card">
+        <div class="section-header"><h2>👥 Attendance & Registration</h2><p>Fill in the numbers. Attendance rate and no-show rate will be calculated automatically.</p></div>
+        <div class="section-body">
+            <div class="form-grid-3">
+                <div class="form-field"><label class="form-label">Registered</label><input type="number" class="form-input" id="f-registrations" placeholder="600"></div>
+                <div class="form-field"><label class="form-label">Attended</label><input type="number" class="form-input" id="f-attended" placeholder="512"></div>
+                <div class="form-field"><label class="form-label">No-shows</label><input type="number" class="form-input" id="f-noShows" placeholder="88"><div class="form-hint">Auto-fills if left blank</div></div>
+                <div class="form-field"><label class="form-label">Sponsors / Exhibitors</label><input type="number" class="form-input" id="f-sponsors" placeholder="12"></div>
+                <div class="form-field"><label class="form-label">Speakers / Presenters</label><input type="number" class="form-input" id="f-speakers" placeholder="28"></div>
+                <div class="form-field"><label class="form-label">Event Staff (total)</label><input type="number" class="form-input" id="f-staffTotal" placeholder="35"></div>
+                <div class="form-field"><label class="form-label">Registration Platform</label><input class="form-input" id="f-registrationPlatform" placeholder="e.g. Eventbrite"></div>
+                <div class="form-field"><label class="form-label">Check-in Method</label><input class="form-input" id="f-checkInMethod" placeholder="e.g. QR scan + badge print"></div>
+            </div>
+            ${navFooter(true,'Budget →')}
+        </div>
+    </div>`;
+}
+
+// ─── Panel: Budget ────────────────────────────────────────────────────────
+function panelBudget(){
+    const cats=[['Venue','budgetVenue'],['Catering','budgetCatering'],['AV / Production','budgetAV'],['Marketing','budgetMarketing'],['Staffing','budgetStaffing'],['Other','budgetOther']];
+    const rows=cats.map(([label,key])=>`
+        <tr>
+            <td style="font-size:.8rem;font-weight:600">${label}</td>
+            <td><input type="number" class="form-input" id="f-${key}Budget" placeholder="0" style="min-width:80px"></td>
+            <td><input type="number" class="form-input" id="f-${key}Actual" placeholder="0" style="min-width:80px"></td>
+            <td id="cell-${key}-var" style="font-size:.8rem;font-weight:600;text-align:center">—</td>
+        </tr>`).join('');
+    return `<div class="section-card">
+        <div class="section-header"><h2>💰 Budget & Financials</h2><p>Budget vs. actual for key cost categories.</p></div>
+        <div class="section-body">
+            <div class="form-grid" style="margin-bottom:1rem">
+                <div class="form-field"><label class="form-label">Total Budget</label><input type="number" class="form-input" id="f-totalBudget" placeholder="85000"></div>
+                <div class="form-field"><label class="form-label">Total Actual Spend</label><input type="number" class="form-input" id="f-totalSpend" placeholder="82400"></div>
+                <div class="form-field"><label class="form-label">Currency</label>
+                    <select class="form-select" id="f-currency">
+                        <option value="EUR">EUR (€)</option><option value="GBP">GBP (£)</option><option value="USD">USD ($)</option>
+                    </select>
+                </div>
+            </div>
+            <table class="report-table" style="margin-bottom:1rem">
+                <thead><tr><th>Category</th><th>Budget</th><th>Actual</th><th>Variance</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+            <div class="form-field"><label class="form-label">Budget Notes</label><textarea class="form-textarea" id="f-budgetNotes" placeholder="Any notable variances, late additions, or savings achieved..."></textarea></div>
+            ${navFooter(true,'Feedback →')}
+        </div>
+    </div>`;
+}
+
+// ─── Panel: Experience / NPS ──────────────────────────────────────────────
+function panelExperience(){
+    const npsNums=[0,1,2,3,4,5,6,7,8,9,10];
+    const npsHtml=npsNums.map(n=>`<div class="nps-num nps-${n}${S.d.npsScore===n?' selected':''}" onclick="setNPS(${n})">${n}</div>`).join('');
+    const ratings=['satisfactionOverall:Overall Experience','satisfactionContent:Content & Speakers','satisfactionVenue:Venue & Facilities','satisfactionCatering:Catering & Breaks','satisfactionAV:AV & Technology'];
+    const ratingRows=ratings.map(r=>{
+        const [key,label]=r.split(':');
+        const v=parseFloat(S.d[key])||0;
+        return `<div class="form-field"><label class="form-label">${label} (out of 5)</label>
+            <input type="range" class="form-range" id="f-${key}" min="0" max="5" step="0.5" value="${v}">
+            <div class="range-label"><span>0</span><span id="val-${key}">${v||0}</span><span>5</span></div>
+        </div>`;
+    }).join('');
+    return `<div class="section-card">
+        <div class="section-header"><h2>⭐ Attendee Feedback & NPS</h2><p>Enter survey results. NPS = Net Promoter Score (0–10).</p></div>
+        <div class="section-body">
+            <div class="form-field" style="margin-bottom:1rem">
+                <label class="form-label">Net Promoter Score (NPS)</label>
+                <div class="nps-scale" id="nps-scale">${npsHtml}</div>
+                <div class="nps-meta"><span>Detractors (0–6)</span><span>Passives (7–8)</span><span>Promoters (9–10)</span></div>
+            </div>
+            <div class="form-grid" style="margin-bottom:1rem">
+                <div class="form-field"><label class="form-label">Survey Responses</label><input type="number" class="form-input" id="f-npsResponses" placeholder="e.g. 220"></div>
+            </div>
+            <div class="form-grid">
+                ${ratingRows}
+            </div>
+            <div class="form-field" style="margin-top:1rem"><label class="form-label">Feedback Notes & Highlights</label>
+                <textarea class="form-textarea" id="f-experienceNotes" placeholder="Key themes from open feedback. Notable quotes. Areas flagged by multiple respondents."></textarea>
+            </div>
+            ${navFooter(true,'Suppliers →')}
+        </div>
+    </div>`;
+}
+
+// ─── Panel: Suppliers ─────────────────────────────────────────────────────
+function panelSuppliers(){
+    const rows=S.d.suppliers.map((s,i)=>buildSupplierRow(s,i)).join('');
+    return `<div class="section-card">
+        <div class="section-header"><h2>🤝 Supplier Performance</h2><p>Rate each key supplier. Would-use-again status flows through to future planning.</p></div>
+        <div class="section-body">
+            <div class="supplier-row-header">
+                <span>Supplier</span><span>Category</span><span style="text-align:center">Rating</span><span style="text-align:center">Use again?</span><span>Notes</span>
+            </div>
+            <div id="supplier-rows">${rows}</div>
+            <button class="btn btn-secondary btn-sm" style="margin-top:.75rem" onclick="addSupplier()">+ Add Supplier</button>
+            ${navFooter(true,'Content →')}
+        </div>
+    </div>`;
+}
+
+function buildSupplierRow(s,i){
+    const starsHtml=[1,2,3,4,5].map(n=>`<span class="star${s.rating>=n?' on':''}" onclick="setSupplierRating(${i},${n})">★</span>`).join('');
+    const yesClass=s.wouldUse===true?'yes':''
+    const noClass=s.wouldUse===false?'no':''
+    return `<div class="supplier-row" id="sup-row-${i}">
+        <input class="form-input" placeholder="Supplier name" value="${esc(s.name)}" onchange="updateSupplier(${i},'name',this.value)" style="font-size:.78rem">
+        <select class="form-select" onchange="updateSupplier(${i},'category',this.value)" style="font-size:.78rem">
+            ${['Venue','Catering','AV / Sound','Signage','Furniture','Logistics','Security','Other'].map(c=>`<option${s.category===c?' selected':''}>${c}</option>`).join('')}
+        </select>
+        <div class="star-select" style="justify-content:center">${starsHtml}</div>
+        <div style="display:flex;gap:.25rem;justify-content:center">
+            <button class="badge-would-use ${yesClass}" onclick="setSupplierWouldUse(${i},true)">✓ Yes</button>
+            <button class="badge-would-use ${noClass}" onclick="setSupplierWouldUse(${i},false)">✕ No</button>
+        </div>
+        <input class="form-input" placeholder="Notes..." value="${esc(s.notes)}" onchange="updateSupplier(${i},'notes',this.value)" style="font-size:.78rem">
+    </div>`;
+}
+
+function addSupplier(){
+    S.d.suppliers.push({name:'',category:'Other',rating:0,wouldUse:null,notes:''});
+    save();
+    document.getElementById('supplier-rows').innerHTML=S.d.suppliers.map((s,i)=>buildSupplierRow(s,i)).join('');
+}
+function updateSupplier(i,key,val){ S.d.suppliers[i][key]=val; save(); }
+function setSupplierRating(i,val){
+    S.d.suppliers[i].rating=val; save();
+    document.getElementById('supplier-rows').innerHTML=S.d.suppliers.map((s,i)=>buildSupplierRow(s,i)).join('');
+}
+function setSupplierWouldUse(i,val){
+    S.d.suppliers[i].wouldUse=val; save();
+    document.getElementById('supplier-rows').innerHTML=S.d.suppliers.map((s,i)=>buildSupplierRow(s,i)).join('');
+}
+
+// ─── Panel: Content ───────────────────────────────────────────────────────
+function panelContent(){
+    return `<div class="section-card">
+        <div class="section-header"><h2>🎤 Content & Speakers</h2><p>Programme performance metrics.</p></div>
+        <div class="section-body">
+            <div class="form-grid">
+                <div class="form-field"><label class="form-label">Total Sessions</label><input type="number" class="form-input" id="f-totalSessions" placeholder="24"></div>
+                <div class="form-field"><label class="form-label">Avg Room Fill Rate (%)</label><input type="number" class="form-input" id="f-avgRoomFill" placeholder="78"></div>
+                <div class="form-field full"><label class="form-label">Most Popular Session</label><input class="form-input" id="f-mostPopularSession" placeholder="e.g. Keynote: The Future of Events — 540 attendees, 4.9/5"></div>
+                <div class="form-field"><label class="form-label">Livestream / On-demand Views</label><input type="number" class="form-input" id="f-streamingViews" placeholder="1,200"></div>
+                <div class="form-field full"><label class="form-label">Content Notes</label><textarea class="form-textarea" id="f-contentNotes" placeholder="Speaker feedback, programme changes on the day, sessions that overran, sessions that underperformed..."></textarea></div>
+            </div>
+            ${navFooter(true,'Lessons →')}
+        </div>
+    </div>`;
+}
+
+// ─── Panel: Lessons ───────────────────────────────────────────────────────
+function panelLessons(){
+    const rows=S.d.lessons.map((l,i)=>buildLessonRow(l,i)).join('');
+    return `<div class="section-card">
+        <div class="section-header"><h2>💡 Lessons Learned & Recommendations</h2><p>What worked, what to improve, actions for next time, and risks to watch.</p></div>
+        <div class="section-body">
+            <div id="lesson-rows">${rows}</div>
+            <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.75rem;margin-bottom:1.25rem">
+                <button class="btn btn-sm" style="background:#dcfce7;color:#15803d;border:none" onclick="addLesson('worked')">+ What worked</button>
+                <button class="btn btn-sm" style="background:#fef3c7;color:#92400e;border:none" onclick="addLesson('improve')">+ What to improve</button>
+                <button class="btn btn-sm" style="background:#dbeafe;color:#1d4ed8;border:none" onclick="addLesson('action')">+ Action item</button>
+                <button class="btn btn-sm" style="background:#fee2e2;color:#b91c1c;border:none" onclick="addLesson('risk')">+ Risk flag</button>
+            </div>
+            <div class="form-field" style="margin-bottom:.75rem">
+                <label class="form-label">Final Recommendations</label>
+                <textarea class="form-textarea" id="f-reco" rows="3" placeholder="Overall strategic recommendations for the next edition..."></textarea>
+            </div>
+            <div class="form-grid">
+                <div class="form-field"><label class="form-label">Next Edition Recommendation</label><input class="form-input" id="f-nextEdition" placeholder="e.g. Recommend: proceed with larger venue in 2027"></div>
+                <div class="form-field"><label class="form-label">Proposed Next Date</label><input type="date" class="form-input" id="f-nextDate"></div>
+            </div>
+            ${navFooter(true,'Generate Report →')}
+        </div>
+    </div>`;
+}
+
+function buildLessonRow(l,i){
+    const typeClass=l.type;
+    const labels={worked:'✓ Worked',improve:'▲ Improve',action:'→ Action',risk:'⚠ Risk'};
+    return `<div class="lesson-row" id="lesson-row-${i}">
+        <span class="lesson-type ${typeClass}">${labels[l.type]||l.type}</span>
+        <input class="form-input" placeholder="Describe..." value="${esc(l.text)}" onchange="updateLesson(${i},'text',this.value)" style="font-size:.78rem">
+        <input class="form-input" placeholder="Owner / next step" value="${esc(l.owner)}" onchange="updateLesson(${i},'owner',this.value)" style="font-size:.78rem">
+        <button class="lesson-remove" onclick="removeLesson(${i})">✕</button>
+    </div>`;
+}
+
+function addLesson(type){
+    S.d.lessons.push({type,text:'',owner:''});
+    save();
+    document.getElementById('lesson-rows').innerHTML=S.d.lessons.map((l,i)=>buildLessonRow(l,i)).join('');
+}
+function updateLesson(i,key,val){ S.d.lessons[i][key]=val; save(); }
+function removeLesson(i){
+    S.d.lessons.splice(i,1); save();
+    document.getElementById('lesson-rows').innerHTML=S.d.lessons.map((l,i)=>buildLessonRow(l,i)).join('');
+}
+
+// ─── Panel: Report ────────────────────────────────────────────────────────
+function panelReport(){
+    const d=S.d;
+    const attended=parseInt(d.attended)||0;
+    const registered=parseInt(d.registrations)||0;
+    const noShows=parseInt(d.noShows)||(registered-attended);
+    const attRate=pct(attended,registered);
+    const budget=parseFloat(d.totalBudget)||0;
+    const spend=parseFloat(d.totalSpend)||0;
+    const variance=budget&&spend?spend-budget:null;
+    const varStr=variance!=null?(variance<=0?`${fmtCurrency(Math.abs(variance),d.currency)} under`:`${fmtCurrency(Math.abs(variance),d.currency)} over`):'—';
+    const varColor=variance!=null?(variance<=0?'#16a34a':'#dc2626'):'#64748b';
+    const currSym={'EUR':'€','GBP':'£','USD':'$'}[d.currency]||'';
+
+    // NPS calculation
+    const npsLabel=d.npsScore===null?'Not set':d.npsScore>=9?'Excellent (Promoter)':d.npsScore>=7?'Good (Passive)':'Needs Attention';
+
+    // Supplier rows
+    const supRows=d.suppliers.filter(s=>s.name).map(s=>`
+        <tr>
+            <td>${esc(s.name)}</td>
+            <td>${esc(s.category)}</td>
+            <td class="stars-display">${stars(s.rating)}</td>
+            <td style="color:${s.wouldUse===true?'#16a34a':s.wouldUse===false?'#dc2626':'#94a3b8'};font-weight:700">${s.wouldUse===true?'✓ Yes':s.wouldUse===false?'✕ No':'—'}</td>
+            <td>${esc(s.notes)}</td>
+        </tr>`).join('');
+
+    // Budget rows
+    const budgetCats=[['Venue','budgetVenue'],['Catering','budgetCatering'],['AV / Production','budgetAV'],['Marketing','budgetMarketing'],['Staffing','budgetStaffing'],['Other','budgetOther']];
+    const budgetRows=budgetCats.filter(([,k])=>d[k+'Budget']||d[k+'Actual']).map(([label,key])=>{
+        const b=parseFloat(d[key+'Budget'])||0;
+        const a=parseFloat(d[key+'Actual'])||0;
+        const v=b?a-b:null;
+        const vc=v!=null?(v<=0?'#16a34a':'#dc2626'):'#64748b';
+        return `<tr><td>${label}</td><td>${b?currSym+b.toLocaleString():'—'}</td><td>${a?currSym+a.toLocaleString():'—'}</td><td style="color:${vc};font-weight:600">${v!=null?(v<=0?'−'+currSym+Math.abs(v).toLocaleString():'+'+currSym+Math.abs(v).toLocaleString()):'—'}</td></tr>`;
+    }).join('');
+
+    // Lessons
+    const lessonsByType={};
+    d.lessons.forEach(l=>{ if(!lessonsByType[l.type])lessonsByType[l.type]=[]; lessonsByType[l.type].push(l); });
+    const tagLabels={worked:'✓ Worked',improve:'▲ Improve',action:'→ Action',risk:'⚠ Risk'};
+    const lessonRows=d.lessons.filter(l=>l.text).map(l=>`
+        <tr>
+            <td><span class="tag tag-${l.type}">${tagLabels[l.type]||l.type}</span></td>
+            <td class="lesson-text">${esc(l.text)}</td>
+            <td style="font-size:.78rem;color:#64748b">${esc(l.owner)}</td>
+        </tr>`).join('');
+
+    // Ratings
+    const ratingFields=[['Overall','satisfactionOverall'],['Content','satisfactionContent'],['Venue','satisfactionVenue'],['Catering','satisfactionCatering'],['AV','satisfactionAV']];
+    const ratingRows=ratingFields.filter(([,k])=>parseFloat(d[k])).map(([label,key])=>{
+        const v=parseFloat(d[key]); const pctV=Math.round(v/5*100);
+        return `<tr><td style="width:120px;font-weight:600;font-size:.8rem">${label}</td>
+            <td><div class="nps-bar"><div class="nps-bar-inner" style="width:${pctV}%;background:${v>=4?'#16a34a':v>=3?'#f59e0b':'#ef4444'}"></div></div></td>
+            <td style="font-size:.82rem;font-weight:700;width:40px">${v}/5</td></tr>`;
+    }).join('');
+
+    const logoHtml=cfg.orgLogoUrl?`<img class="report-cover-logo" src="${esc(cfg.orgLogoUrl)}" alt="${esc(d.companyName||cfg.companyName)}">`:'';
+    const reportDate=d.reportDate||new Date().toISOString().slice(0,10);
+
+    return `<div id="report-preview">
+        <div class="report-cover">
+            ${logoHtml}
+            <h1>${esc(d.eventName||cfg.eventName)}</h1>
+            <h2>Post-Event Report</h2>
+            <div class="report-cover-meta">
+                ${d.venue?esc(d.venue)+' · ':''}${fmtDate(d.eventDate)||''}<br>
+                Prepared by ${esc(d.reportAuthor||cfg.reportAuthor||'Event Team')} · ${fmtDate(reportDate)}
+            </div>
+        </div>
+        <div class="report-body">
+
+            ${d.summary?`<div class="report-section"><h3>Executive Summary</h3><p class="report-paragraph">${esc(d.summary)}</p></div>`:''}
+
+            <div class="report-section">
+                <h3>Key Metrics</h3>
+                <div class="report-kpis">
+                    ${attended?`<div class="kpi-card"><div class="kpi-value">${attended.toLocaleString()}</div><div class="kpi-label">Attended</div></div>`:''}
+                    ${attRate?`<div class="kpi-card"><div class="kpi-value">${attRate}%</div><div class="kpi-label">Attendance Rate</div></div>`:''}
+                    ${d.sponsors?`<div class="kpi-card"><div class="kpi-value">${d.sponsors}</div><div class="kpi-label">Sponsors / Exhibitors</div></div>`:''}
+                    ${d.speakers?`<div class="kpi-card"><div class="kpi-value">${d.speakers}</div><div class="kpi-label">Speakers</div></div>`:''}
+                    ${d.npsScore!==null?`<div class="kpi-card"><div class="kpi-value">${d.npsScore}</div><div class="kpi-label">NPS Score</div></div>`:''}
+                    ${budget?`<div class="kpi-card"><div class="kpi-value" style="color:${varColor}">${varStr}</div><div class="kpi-label">Budget Variance</div></div>`:''}
+                    ${d.streamingViews?`<div class="kpi-card"><div class="kpi-value">${parseInt(d.streamingViews).toLocaleString()}</div><div class="kpi-label">Stream Views</div></div>`:''}
+                </div>
+            </div>
+
+            ${registered||attended?`<div class="report-section"><h3>Attendance & Registration</h3>
+                <table class="report-table"><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>
+                    ${registered?`<tr><td>Registered</td><td>${registered.toLocaleString()}</td></tr>`:''}
+                    ${attended?`<tr><td>Attended</td><td>${attended.toLocaleString()}</td></tr>`:''}
+                    ${noShows&&registered?`<tr><td>No-shows</td><td>${noShows.toLocaleString()} (${Math.round(noShows/registered*100)}%)</td></tr>`:''}
+                    ${d.registrationPlatform?`<tr><td>Registration Platform</td><td>${esc(d.registrationPlatform)}</td></tr>`:''}
+                    ${d.checkInMethod?`<tr><td>Check-in Method</td><td>${esc(d.checkInMethod)}</td></tr>`:''}
+                </tbody></table>
+            </div>`:''}
+
+            ${budget||budgetRows?`<div class="report-section"><h3>Budget & Financials</h3>
+                <div class="report-kpis" style="margin-bottom:.75rem">
+                    ${budget?`<div class="kpi-card"><div class="kpi-value">${currSym}${budget.toLocaleString()}</div><div class="kpi-label">Total Budget</div></div>`:''}
+                    ${spend?`<div class="kpi-card"><div class="kpi-value">${currSym}${spend.toLocaleString()}</div><div class="kpi-label">Actual Spend</div></div>`:''}
+                    ${variance!=null?`<div class="kpi-card"><div class="kpi-value" style="color:${varColor}">${varStr}</div><div class="kpi-label">Overall Variance</div></div>`:''}
+                </div>
+                ${budgetRows?`<table class="report-table"><thead><tr><th>Category</th><th>Budget</th><th>Actual</th><th>Variance</th></tr></thead><tbody>${budgetRows}</tbody></table>`:''}
+                ${d.budgetNotes?`<p class="report-paragraph" style="margin-top:.75rem;font-size:.78rem;color:#64748b">${esc(d.budgetNotes)}</p>`:''}
+            </div>`:''}
+
+            ${ratingRows?`<div class="report-section"><h3>Attendee Satisfaction</h3>
+                ${d.npsScore!==null?`<p style="font-size:.82rem;font-weight:600;margin-bottom:.5rem">NPS: <span style="color:${d.npsScore>=9?'#16a34a':d.npsScore>=7?'#f59e0b':'#ef4444'};font-size:1rem">${d.npsScore}</span> — ${npsLabel} ${d.npsResponses?`(${d.npsResponses} responses)`:''}</p>`:''}
+                <table class="report-table"><tbody>${ratingRows}</tbody></table>
+                ${d.experienceNotes?`<p class="report-paragraph" style="margin-top:.75rem;font-size:.78rem;color:#374151">${esc(d.experienceNotes)}</p>`:''}
+            </div>`:''}
+
+            ${d.totalSessions||d.mostPopularSession?`<div class="report-section"><h3>Content & Programme</h3>
+                <table class="report-table"><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>
+                    ${d.totalSessions?`<tr><td>Total Sessions</td><td>${esc(d.totalSessions)}</td></tr>`:''}
+                    ${d.avgRoomFill?`<tr><td>Avg Room Fill Rate</td><td>${esc(d.avgRoomFill)}%</td></tr>`:''}
+                    ${d.mostPopularSession?`<tr><td>Most Popular Session</td><td>${esc(d.mostPopularSession)}</td></tr>`:''}
+                    ${d.streamingViews?`<tr><td>Streaming / On-demand Views</td><td>${parseInt(d.streamingViews).toLocaleString()}</td></tr>`:''}
+                </tbody></table>
+                ${d.contentNotes?`<p class="report-paragraph" style="margin-top:.5rem;font-size:.78rem;color:#64748b">${esc(d.contentNotes)}</p>`:''}
+            </div>`:''}
+
+            ${supRows?`<div class="report-section"><h3>Supplier Performance</h3>
+                <table class="report-table"><thead><tr><th>Supplier</th><th>Category</th><th>Rating</th><th>Use Again</th><th>Notes</th></tr></thead><tbody>${supRows}</tbody></table>
+            </div>`:''}
+
+            ${lessonRows?`<div class="report-section"><h3>Lessons Learned</h3>
+                <table class="report-table"><thead><tr><th>Type</th><th>Item</th><th>Owner</th></tr></thead><tbody>${lessonRows}</tbody></table>
+            </div>`:''}
+
+            ${d.reco?`<div class="report-section"><h3>Recommendations</h3>
+                <p class="report-paragraph">${esc(d.reco)}</p>
+                ${d.nextEdition?`<p style="font-size:.82rem;margin-top:.5rem"><strong>Next edition:</strong> ${esc(d.nextEdition)}</p>`:''}
+                ${d.nextDate?`<p style="font-size:.82rem;margin-top:.25rem"><strong>Proposed date:</strong> ${fmtDate(d.nextDate)}</p>`:''}
+            </div>`:''}
+
+            <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid #e2e8f0;font-size:.68rem;color:#94a3b8;text-align:center">
+                Report generated by EventHive — eventhive.io
+            </div>
+        </div>
+    </div>
+    <div style="text-align:center;padding:1rem 0">
+        <button class="btn btn-primary btn-lg" onclick="window.print()">🖨 Print / Export PDF</button>
+        <button class="btn btn-secondary btn-lg" style="margin-left:.5rem" onclick="exportJSON()">💾 Save Backup</button>
+    </div>`;
+}
+
+// ─── Bind panel inputs ────────────────────────────────────────────────────
+function bindCurrentPanel(stepId){
+    const fields={
+        overview: ['eventName','eventDate','venue','duration','eventType','reportAuthor','reportDate','summary'],
+        attendance: ['registrations','attended','noShows','sponsors','speakers','staffTotal','registrationPlatform','checkInMethod'],
+        budget: ['totalBudget','totalSpend','currency','budgetVenueActual','budgetCateringActual','budgetAVActual','budgetMarketingActual','budgetStaffingActual','budgetOtherActual','budgetVenueBudget','budgetCateringBudget','budgetAVBudget','budgetMarketingBudget','budgetStaffingBudget','budgetOtherBudget','budgetNotes'],
+        experience: ['npsResponses','satisfactionOverall','satisfactionContent','satisfactionVenue','satisfactionCatering','satisfactionAV','experienceNotes'],
+        content: ['totalSessions','mostPopularSession','avgRoomFill','streamingViews','contentNotes'],
+        lessons: ['reco','nextEdition','nextDate']
+    };
+    (fields[stepId]||[]).forEach(key=>{
+        bind('f-'+key, key);
+    });
+    // Range display values
+    ['satisfactionOverall','satisfactionContent','satisfactionVenue','satisfactionCatering','satisfactionAV'].forEach(key=>{
+        const el=document.getElementById('f-'+key);
+        const valEl=document.getElementById('val-'+key);
+        if(el&&valEl){ el.addEventListener('input',()=>{ valEl.textContent=el.value; }); }
+    });
+    // Budget variance cells
+    if(stepId==='budget'){
+        const cats=[['budgetVenue','cell-budgetVenue-var'],['budgetCatering','cell-budgetCatering-var'],['budgetAV','cell-budgetAV-var'],['budgetMarketing','cell-budgetMarketing-var'],['budgetStaffing','cell-budgetStaffing-var'],['budgetOther','cell-budgetOther-var']];
+        function updateVariances(){
+            const cur=document.getElementById('f-currency')?.value||S.d.currency||'EUR';
+            const sym={'EUR':'€','GBP':'£','USD':'$'}[cur]||'';
+            cats.forEach(([key,cellId])=>{
+                const b=parseFloat(document.getElementById('f-'+key+'Budget')?.value)||0;
+                const a=parseFloat(document.getElementById('f-'+key+'Actual')?.value)||0;
+                const cell=document.getElementById(cellId);
+                if(cell&&b){
+                    const v=a-b;
+                    cell.textContent=(v<=0?'−'+sym+Math.abs(v).toLocaleString():'+'+sym+Math.abs(v).toLocaleString());
+                    cell.style.color=v<=0?'#16a34a':'#dc2626';
+                }
+            });
+        }
+        cats.forEach(([key])=>{
+            ['f-'+key+'Budget','f-'+key+'Actual'].forEach(id=>{
+                document.getElementById(id)?.addEventListener('input',updateVariances);
+            });
+        });
+        document.getElementById('f-currency')?.addEventListener('change',updateVariances);
+        updateVariances();
+    }
+}
+
+// ─── NPS ──────────────────────────────────────────────────────────────────
+function setNPS(n){
+    S.d.npsScore=n; save();
+    document.querySelectorAll('.nps-num').forEach((el,i)=>el.classList.toggle('selected',i===n));
+}
+
+// ─── Export / Import ──────────────────────────────────────────────────────
+function exportJSON(){
+    const blob=new Blob([JSON.stringify(S.d,null,2)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download='post-event-report-'+slugify(S.d.eventName||cfg.eventName||'event')+'.json';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    showToast('Backup saved');
+}
+function printReport(){
+    if(S.step!==STEPS.length-1){ if(confirm('Generate the final report now and print?')){ goStep(STEPS.length-1); setTimeout(()=>window.print(),300); } }
+    else window.print();
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────
+let _tt;
+function showToast(msg){
+    const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');
+    clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),2600);
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async ()=>{
+    document.documentElement.style.setProperty('--primary',cfg.primaryColor);
+    document.getElementById('hdr-company').textContent=cfg.companyName;
+    document.title=cfg.companyName+' — Post-Event Report';
+    if(cfg.logoUrl){
+        const l=document.getElementById('logo-img');l.src=cfg.logoUrl;l.style.display='block';
+        l.onerror=()=>l.style.display='none';
+    }
+
+    // Set LS key
+    LS_KEY='eventhive_per_'+(cfg.eventName?slugify(cfg.eventName):'default');
+
+    // Detect hosted mode
+    if (EVENTHIVE_CONFIG.__hosted && EVENTHIVE_CONFIG.__apiBase) {
+        try {
+            const probe = await fetch(EVENTHIVE_CONFIG.__apiBase + '/report_state', { credentials: 'include' });
+            if (probe.ok) { _perHosted = true; _perApiBase = EVENTHIVE_CONFIG.__apiBase; }
+        } catch(e) { console.warn('Post-Event Report hosted mode unavailable:', e); }
+    }
+
+    // Pre-fill from config
+    if(cfg.eventName)  S.d.eventName    = S.d.eventName    || cfg.eventName;
+    if(cfg.eventDate)  S.d.eventDate    = S.d.eventDate    || cfg.eventDate;
+    if(cfg.reportAuthor) S.d.reportAuthor = S.d.reportAuthor || cfg.reportAuthor;
+
+    // Try to pull linked countdown plan data (task completion %)
+    if(cfg.eventName){
+        const planKey='eventhive_event_'+slugify(cfg.eventName)+'_plan';
+        const planRaw=localStorage.getItem(planKey);
+        if(planRaw){
+            try{
+                const plan=JSON.parse(planRaw);
+                if(plan.tasks){
+                    const done=plan.tasks.filter(t=>t.completed).length;
+                    const total=plan.tasks.length;
+                    if(total&&!S.d.summary){
+                        S.d.summary = `${S.d.eventName||cfg.eventName} completed with ${done} of ${total} pre-event tasks marked complete in the Countdown Planner.`;
+                    }
+                }
+            } catch{}
+        }
+    }
+
+    await load();
+    renderNav();
+    renderPanel();
+});
+</script>
+</body>
+</html>
